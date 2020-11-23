@@ -192,3 +192,8 @@ void LU()
     duration = (double)(stop - start) / CLK_TCK;
     printf("解方程所用时间：%f\n", duration);
 }
+
+void Lagrange()
+{
+
+}

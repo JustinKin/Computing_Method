@@ -8,111 +8,137 @@ double duration;
 int main()
 {
     start = clock();
-    //已知初始的5个坐标点
-    float x[5] = {-2.312, 2.061, -0.8545, -3.519, 2.815};
-    float y[5] = {0.5027, -1.257, -2.915, -1.156, -2.815};
-    float A[5][5];
-    float B[5];
-    //生成矩阵A、B,AX=B
-    for (int i = 0; i < 5; ++i)
+
+    FILE* read=NULL;
+    FILE* write1=NULL;
+    FILE* write2=NULL;
+    //打开.txt文件
+    fopen_s(&read,"image_data/1.txt","r");
+    if(!read)
     {
-        A[i][0] = x[i] * y[i];
-        A[i][1] = y[i] * y[i];
-        A[i][2] = x[i];
-        A[i][3] = y[i];
-        A[i][4] = 1;
-        B[i] = -x[i] * x[i];
+        perror("fail to read !");
+        exit (-1);
     }
-    //输出矩阵A
-    printf("A = \n");
-    for (int i = 0; i < 5; ++i)
+    fopen_s(&write1,"image_data/1_linear.txt","w");
+    if(!write1)
     {
-        for (int j = 0; j < 5; ++j)
-            printf("% 6f  ", A[i][j]);
-        printf("\n");
+        perror("fail to write1 !");
+        exit (-1);
     }
-    printf("\n");
-    //输出矩阵B
-    printf("B = \n");
-    for (int i = 0; i < 5; ++i)
-        printf("% 6f  ", B[i]);
-    printf("\n\n");
-    //求LU矩阵
-    for (int i = 0; i < 5; ++i)
+    fopen_s(&write2,"image_data/1_cubic.txt","w");
+    if(!write2)
     {
-        for (int j = i; j < 5; ++j)
+        perror("fail to write1 !");
+        exit (-1);
+    }
+    //读入.txt文件数据
+    int img[50][50];
+    for(int i=0; i<50; i++)
+    {
+        for(int j=0; j<50; j++)
         {
-            //求U矩阵
-            float sum = 0.0;
-            for (int k = 0; k < i; ++k)
+            fscanf(read, "%d",&img[i][j]);
+        }
+    }
+    fclose(read);
+    //49 * 10 +1 = 491
+    int  tmp[50][491];
+    //先插值行，共有50行，每行的50列变成491列
+    // 外循环i是行，内循环j是列
+    for(int i=0; i<50; i++)
+    {
+        // tmp[i][0] = img[i][0];
+        int p1 = -10;
+        int p2 = 0;
+        for(int j=0; j<491; j++)
+        {
+            if(j % 10 == 0)
             {
-                sum += A[i][k] * A[k][j];
+                tmp[i][j] = img[i][j/10];
+                p1 += 10;
+                p2 += 10;
             }
-            A[i][j] = A[i][j] - sum;
-            //求L矩阵
-            sum = 0.0;
-            if (j > i)
+            else
             {
-                for (int k = 0; k < i; ++k)
-                {
-                    sum += A[j][k] * A[k][i];
-                }
-                A[j][i] = (A[j][i] - sum) / A[i][i];
+                tmp[i][j] = img[i][p1/10] * (j - p2) / (p1 -p2)
+                          + img[i][p2/10] * (j - p1) / (p2 -p1);
             }
         }
     }
-    //输出L矩阵
-    printf("L = \n");
-    for (int i = 0; i < 5; ++i)
+    //插值列
+    // 外循环j是列，内循环i是行
+    int  linear[491][491];
+    for(int j = 0; j < 491 ; ++j)
     {
-        for (int j = 0; j < 5; ++j)
+        // linear[0][j] = tmp[0][j];
+        int p1 = -10;
+        int p2 = 0;
+        for(int i = 0; i <491; ++i)
         {
-            if (j == i)
-                printf("% 6f  ", 1.0);
-            if (j > i)
-                printf("% 6f  ", 0.0);
-            if (j < i)
-                printf("% 6f  ", A[i][j]);
+            if(i % 10 == 0)
+            {
+                linear[i][j] = tmp[i/10][j];
+                p1 += 10;
+                p2 += 10;
+            }
+            else
+            {
+                linear[i][j] = tmp[p1/10][j] * (i - p2) / (p1 -p2)
+                             + tmp[p2/10][j] * (i - p1) / (p2 -p1);
+            }
+        }
+    }
+
+
+
+
+
+
+
+    for(int i=0; i<491; i++)
+    {
+        for(int j=0; j<491; j++)
+        {
+            fprintf(write1,"%3d  ", linear[i][j]);
+        }
+        fprintf(write1,"\n");
+    }
+
+
+
+
+
+/*
+    for (int i = 0; i < 50; ++i)
+    {
+        for (int j = 0; j < 50; ++j)
+        {
+            printf("%3d  ", img[i][j]);
         }
         printf("\n");
     }
-    printf("\n");
-    //输出U矩阵
-    printf("U = \n");
-    for (int i = 0; i < 5; ++i)
-    {
-        for (int j = 0; j < 5; ++j)
-        {
-            if (j >= i)
-                printf("% 6f  ", A[i][j]);
-            if (j < i)
-                printf("% 6f  ", 0.0);
-        }
-        printf("\n");
-    }
-    printf("\n");
-    //求解LY = B
-    float Y[5];
-    for (int i = 0; i < 5; ++i)
-    {
-        float sum = 0.0;
-        for (int j = 0; j < i; ++j)
-            sum += A[i][j] * Y[j];
-        Y[i] = B[i] - sum;
-    }
-    //求解UX = Y
-    float X[5];
-    for (int i = 4; i > -1; --i)
-    {
-        float sum = 0.0;
-        for (int j = 4; j > i; --j)
-            sum += A[i][j] * X[j];
-        X[i] = (Y[i] - sum) / A[i][i];
-    }
-    printf("Result = \n");
-    for (int i = 0; i < 5; ++i)
-        printf("% 6f  ", X[i]);
-    printf("\n\n");
+ */
+        fclose(write1);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     stop = clock();
     duration = (double)(stop - start) / CLK_TCK;
