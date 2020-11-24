@@ -1,0 +1,10 @@
+clc;
+data1 = textread('4.txt')/255;
+data2 = textread('4_linear.txt')/255;
+data3 = textread('4_cubic.txt')/255;
+figure;
+imshow(data1);
+figure;
+imshow(data2);
+figure;
+imshow(data3);
