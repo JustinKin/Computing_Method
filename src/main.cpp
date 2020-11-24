@@ -14,21 +14,21 @@ int main()
     FILE *write2 = NULL;
     //打开.txt文件
     //打开原始数据的文件
-    fopen_s(&read, "image_data/2.txt", "r");
+    fopen_s(&read, "image_data/1.txt", "r");
     if (!read)
     {
         perror("fail to read !");
         exit(-1);
     }
     //创建保存线性插值结果的文件
-    fopen_s(&write1, "image_data/2_linear.txt", "w");
+    fopen_s(&write1, "image_data/1_linear.txt", "w");
     if (!write1)
     {
         perror("fail to write1 !");
         exit(-2);
     }
     //创建保存三次插值结果的文件
-    fopen_s(&write2, "image_data/2_cubic.txt", "w");
+    fopen_s(&write2, "image_data/1_cubic.txt", "w");
     if (!write2)
     {
         perror("fail to write1 !");

@@ -1,7 +1,7 @@
 clc;
-data1 = textread('4.txt')/255;
-data2 = textread('4_linear.txt')/255;
-data3 = textread('4_cubic.txt')/255;
+data1 = textread('2.txt')/255;
+data2 = textread('2_linear.txt')/255;
+data3 = textread('2_cubic.txt')/255;
 figure;
 imshow(data1);
 figure;
