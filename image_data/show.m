@@ -1,10 +1,10 @@
 clc;
-data1 = textread('2.txt')/255;
-data2 = textread('2_linear.txt')/255;
-data3 = textread('2_cubic.txt')/255;
-figure;
+data1 = textread('1.txt')/255;
+data2 = textread('1_linear.txt')/255;
+data3 = textread('1_cubic.txt')/255;
+figure('NumberTitle', 'off', 'Name', '原图');
 imshow(data1);
-figure;
+figure('NumberTitle', 'off', 'Name', '线性插值');
 imshow(data2);
-figure;
+ figure('NumberTitle', 'off', 'Name', '三次插值');
 imshow(data3);
