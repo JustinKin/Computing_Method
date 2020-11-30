@@ -109,6 +109,7 @@ int main()
     for (int i = 0; i < 50; i++)
     {
         int p[4] ={-10,0,10,20};
+        float md[6] = {0.0};
         //除了前、后10列都进行插值
         for (int j = 10; j < 481; j++)
         {
@@ -119,22 +120,19 @@ int main()
                 p[1] += 10;
                 p[2] += 10;
                 p[3] += 10;
+                md[0] = (img[i][p[1]/10] - img[i][p[0]/10]) / (p[1] - p[0]);
+                md[1] = (img[i][p[2]/10] - img[i][p[1]/10]) / (p[2] - p[1]);
+                md[2] = (img[i][p[3]/10] - img[i][p[2]/10]) / (p[3] - p[2]);
+                md[3] = (md[1] - md[0]) / (p[2] - p[0]);
+                md[4] = (md[2] - md[1]) / (p[3] - p[1]);
+                md[5] = (md[4] - md[3]) / (p[3] - p[0]);
             }
             else
             {
-                float md[4] = {img[i][p[0]/10], img[i][p[1]/10], img[i][p[2]/10], img[i][p[3]/10]};
-                float sum = md[0];
-                float product = 1.0;
-                for(int item=1, max=3; item<4; ++item,--max)
-                {
-                    for(int k = 0; k < max; ++k)
-                    {
-                        md[k] = (md[k+1] - md[k]) / (10 * item);
-                    }
-                    product *= (j - p[item-1]);
-                    sum += md[0] * product;
-                }
-                tmp[i][j] = sum;
+                tmp[i][j] = img[i][j / 10 - 1]    //watchout -1
+                            + md[0] * (j - p[0])
+                            + md[3] * (j - p[0]) * (j - p[1])
+                            + md[5] * (j - p[0]) * (j - p[1]) * (j - p[2]);
             }
         }
     }
@@ -144,44 +142,36 @@ int main()
         tmp[i][0] = img[i][0];
         tmp[i][490] = img[i][49];
         int p[4] ={0,10,20,30};
-        float md[4] = {img[i][0], img[i][1], img[i][2], img[i][3]};
+        float md[6] = {0.0};
+        md[0] = (img[i][p[1]/10] - img[i][p[0]/10]) / (p[1] - p[0]);
+        md[1] = (img[i][p[2]/10] - img[i][p[1]/10]) / (p[2] - p[1]);
+        md[2] = (img[i][p[3]/10] - img[i][p[2]/10]) / (p[3] - p[2]);
+        md[3] = (md[1] - md[0]) / (p[2] - p[0]);
+        md[4] = (md[2] - md[1]) / (p[3] - p[1]);
+        md[5] = (md[4] - md[3]) / (p[3] - p[0]);
         for (int j = 1; j <10; j++)
         {
-            float sum = md[0];
-            float product = 1.0;
-            for(int item=1, max=3; item<4; ++item,--max)
-            {
-                for(int k = 0; k < max; ++k)
-                {
-                    md[k] = (md[k+1] - md[k]) / (10 * item);
-                }
-                product *= (j - p[item-1]);
-                sum += md[0] * product;
-            }
-            tmp[i][j] = sum;
+            tmp[i][j] = img[i][0]
+                      + md[0] * (j - p[0])
+                      + md[3] * (j - p[0]) * (j - p[1])
+                      + md[5] * (j - p[0]) * (j - p[1]) * (j - p[2]);
         }
         p[0] = 460;
         p[1] = 470;
         p[2] = 480;
         p[3] = 490;
-        md[0] = img[i][46];
-        md[1] = img[i][47];
-        md[2] = img[i][48];
-        md[3] = img[i][49];
+        md[0] = (img[i][p[1]/10] - img[i][p[0]/10]) / (p[1] - p[0]);
+        md[1] = (img[i][p[2]/10] - img[i][p[1]/10]) / (p[2] - p[1]);
+        md[2] = (img[i][p[3]/10] - img[i][p[2]/10]) / (p[3] - p[2]);
+        md[3] = (md[1] - md[0]) / (p[2] - p[0]);
+        md[4] = (md[2] - md[1]) / (p[3] - p[1]);
+        md[5] = (md[4] - md[3]) / (p[3] - p[0]);
         for (int j = 481; j <490; j++)
         {
-            float sum = md[0];
-            float product = 1.0;
-            for(int item=1, max=3; item<4; ++item,--max)
-            {
-                for(int k = 0; k < max; ++k)
-                {
-                    md[k] = (md[k+1] - md[k]) / (10 * item);
-                }
-                product *= (j - p[item-1]);
-                sum += md[0] * product;
-            }
-            tmp[i][j] = sum;
+            tmp[i][j] = img[i][46]
+                      + md[0] * (j - p[0])
+                      + md[3] * (j - p[0]) * (j - p[1])
+                      + md[5] * (j - p[0]) * (j - p[1]) * (j - p[2]);
         }
     }
     //插值列
@@ -191,6 +181,7 @@ int main()
     {
         int p[4] ={-10,0,10,20};
         //除了前、后10行都进行插值
+        float md[6] = {0.0};
         for (int i = 10; i < 481; ++i)
         {
             if (i % 10 == 0)
@@ -201,22 +192,19 @@ int main()
                 p[1] += 10;
                 p[2] += 10;
                 p[3] += 10;
+                md[0] = (tmp[p[1]/10][j] - tmp[p[0]/10][j]) / (p[1] - p[0]);
+                md[1] = (tmp[p[2]/10][j] - tmp[p[1]/10][j]) / (p[2] - p[1]);
+                md[2] = (tmp[p[3]/10][j] - tmp[p[2]/10][j]) / (p[3] - p[2]);
+                md[3] = (md[1] - md[0]) / (p[2] - p[0]);
+                md[4] = (md[2] - md[1]) / (p[3] - p[1]);
+                md[5] = (md[4] - md[3]) / (p[3] - p[0]);
             }
             else
             {
-                float md[4] = {tmp[p[0]/10][j], tmp[p[1]/10][j], tmp[p[2]/10][j], tmp[p[3]/10][j]};
-                float sum = md[0];
-                float product = 1.0;
-                for(int item=1, max=3; item<4; ++item,--max)
-                {
-                    for(int k = 0; k < max; ++k)
-                    {
-                        md[k] = (md[k+1] - md[k]) / (10 * item);
-                    }
-                    product *= (j - p[item-1]);
-                    sum += md[0] * product;
-                }
-                cubic[i][j] = sum;
+                cubic[i][j] = tmp[i / 10 - 1][j]    //watchout -1
+                            + md[0] * (i - p[0])
+                            + md[3] * (i - p[0]) * (i - p[1])
+                            + md[5] * (i - p[0]) * (i - p[1]) * (i - p[2]);
             }
         }
     }
@@ -226,44 +214,36 @@ int main()
         cubic[0][j] = tmp[0][j];
         cubic[490][j] = tmp[49][j];
         int p[4] ={0,10,20,30};
-        float md[4] = {tmp[0][j], tmp[1][j], tmp[2][j], tmp[3][j]};
+        float md[6] = {0.0};
+        md[0] = (tmp[p[1]/10][j] - tmp[p[0]/10][j]) / (p[1] - p[0]);
+        md[1] = (tmp[p[2]/10][j] - tmp[p[1]/10][j]) / (p[2] - p[1]);
+        md[2] = (tmp[p[3]/10][j] - tmp[p[2]/10][j]) / (p[3] - p[2]);
+        md[3] = (md[1] - md[0]) / (p[2] - p[0]);
+        md[4] = (md[2] - md[1]) / (p[3] - p[1]);
+        md[5] = (md[4] - md[3]) / (p[3] - p[0]);
         for(int i = 0; i < 10; ++i)
         {
-            float sum = md[0];
-            float product = 1.0;
-            for(int item=1, max=3; item<4; ++item,--max)
-            {
-                for(int k = 0; k < max; ++k)
-                {
-                    md[k] = (md[k+1] - md[k]) / (10 * item);
-                }
-                product *= (i - p[item-1]);
-                sum += md[0] * product;
-            }
-            cubic[i][j] = sum;
+            cubic[i][j] = tmp[0][j]
+                        + md[0] * (i - p[0])
+                        + md[3] * (i - p[0]) * (i - p[1])
+                        + md[5] * (i - p[0]) * (i - p[1]) * (i - p[2]);
         }
         p[0] = 460;
         p[1] = 470;
         p[2] = 480;
         p[3] = 490;
-        md[0] = tmp[46][j];
-        md[1] = tmp[47][j];
-        md[2] = tmp[48][j];
-        md[3] = tmp[49][j];
+        md[0] = (tmp[p[1]/10][j] - tmp[p[0]/10][j]) / (p[1] - p[0]);
+        md[1] = (tmp[p[2]/10][j] - tmp[p[1]/10][j]) / (p[2] - p[1]);
+        md[2] = (tmp[p[3]/10][j] - tmp[p[2]/10][j]) / (p[3] - p[2]);
+        md[3] = (md[1] - md[0]) / (p[2] - p[0]);
+        md[4] = (md[2] - md[1]) / (p[3] - p[1]);
+        md[5] = (md[4] - md[3]) / (p[3] - p[0]);
         for(int i = 481; i < 490; ++i)
         {
-            float sum = md[0];
-            float product = 1.0;
-            for(int item=1, max=3; item<4; ++item,--max)
-            {
-                for(int k = 0; k < max; ++k)
-                {
-                    md[k] = (md[k+1] - md[k]) / (10 * item);
-                }
-                product *= (i - p[item-1]);
-                sum += md[0] * product;
-            }
-            cubic[i][j] = sum;
+            cubic[i][j] = tmp[46][j]
+                        + md[0] * (i - p[0])
+                        + md[3] * (i - p[0]) * (i - p[1])
+                        + md[5] * (i - p[0]) * (i - p[1]) * (i - p[2]);
         }
 
     }
