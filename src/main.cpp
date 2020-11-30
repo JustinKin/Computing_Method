@@ -21,14 +21,14 @@ int main()
         exit(-1);
     }
     //创建保存线性插值结果的文件
-    fopen_s(&write1, "image_data/1_linear.txt", "w");
+    fopen_s(&write1, "image_data/Newton_linear.txt", "w");
     if (!write1)
     {
         perror("fail to write1 !");
         exit(-2);
     }
     //创建保存三次插值结果的文件
-    fopen_s(&write2, "image_data/1_cubic.txt", "w");
+    fopen_s(&write2, "image_data/Newton_cubic.txt", "w");
     if (!write2)
     {
         perror("fail to write1 !");
@@ -54,6 +54,7 @@ int main()
     {
         int p1 = -10;
         int p2 = 0;
+        float md = 0.0;
         for (int j = 0; j < 491; j++)
         {
             if (j % 10 == 0)
@@ -61,11 +62,11 @@ int main()
                 tmp[i][j] = img[i][j / 10];
                 p1 += 10;
                 p2 += 10;
+                md = (img[i][p2 / 10] - img[i][p1 / 10]) / (p2 - p1);
             }
             else
             {
-                tmp[i][j] = img[i][p1 / 10] * (j - p2) / (p1 - p2)
-                          + img[i][p2 / 10] * (j - p1) / (p2 - p1);
+                tmp[i][j] = img[i][p1 / 10] + md * (j - p1);
             }
         }
     }
@@ -76,6 +77,7 @@ int main()
     {
         int p1 = -10;
         int p2 = 0;
+        float md = 0.0;
         for (int i = 0; i < 491; ++i)
         {
             if (i % 10 == 0)
@@ -83,11 +85,11 @@ int main()
                 linear[i][j] = tmp[i / 10][j];
                 p1 += 10;
                 p2 += 10;
+                md = (tmp[p2 / 10][j] - tmp[p1 / 10][j]) / (p2 - p1);
             }
             else
             {
-                linear[i][j] = tmp[p1 / 10][j] * (i - p2) / (p1 - p2)
-                             + tmp[p2 / 10][j] * (i - p1) / (p2 - p1);
+                linear[i][j] = tmp[p1 / 10][j] + md * (i - p1);
             }
         }
     }
@@ -106,27 +108,33 @@ int main()
     // 外循环i是行，内循环j是列
     for (int i = 0; i < 50; i++)
     {
-        int p1 = -10;
-        int p2 = 0;
-        int p3 = 10;
-        int p4 = 20;
+        int p[4] ={-10,0,10,20};
         //除了前、后10列都进行插值
         for (int j = 10; j < 481; j++)
         {
             if (j % 10 == 0)
             {
                 tmp[i][j] = img[i][j / 10];
-                p1 += 10;
-                p2 += 10;
-                p3 += 10;
-                p4 += 10;
+                p[0] += 10;
+                p[1] += 10;
+                p[2] += 10;
+                p[3] += 10;
             }
             else
             {
-                tmp[i][j] = img[i][p1 / 10] * (j - p2) * (j - p3) * (j - p4) / ((p1 - p2) * (p1 - p3) * (p1 - p4))
-                          + img[i][p2 / 10] * (j - p1) * (j - p3) * (j - p4) / ((p2 - p1) * (p2 - p3) * (p2 - p4))
-                          + img[i][p3 / 10] * (j - p1) * (j - p2) * (j - p4) / ((p3 - p1) * (p3 - p2) * (p3 - p4))
-                          + img[i][p4 / 10] * (j - p1) * (j - p2) * (j - p3) / ((p4 - p1) * (p4 - p2) * (p4 - p3));
+                float md[4] = {img[i][p[0]/10], img[i][p[1]/10], img[i][p[2]/10], img[i][p[3]/10]};
+                float sum = md[0];
+                float product = 1.0;
+                for(int item=1, max=3; item<4; ++item,--max)
+                {
+                    for(int k = 0; k < max; ++k)
+                    {
+                        md[k] = (md[k+1] - md[k]) / (10 * item);
+                    }
+                    product *= (j - p[item-1]);
+                    sum += md[0] * product;
+                }
+                tmp[i][j] = sum;
             }
         }
     }
@@ -135,27 +143,45 @@ int main()
     {
         tmp[i][0] = img[i][0];
         tmp[i][490] = img[i][49];
-        int p1 = 0;
-        int p2 = 10;
-        int p3 = 20;
-        int p4 = 30;
+        int p[4] ={0,10,20,30};
+        float md[4] = {img[i][0], img[i][1], img[i][2], img[i][3]};
         for (int j = 1; j <10; j++)
         {
-            tmp[i][j] = img[i][0] * (j - p2) * (j - p3) * (j - p4) / ((p1 - p2) * (p1 - p3) * (p1 - p4))
-                      + img[i][1] * (j - p1) * (j - p3) * (j - p4) / ((p2 - p1) * (p2 - p3) * (p2 - p4))
-                      + img[i][2] * (j - p1) * (j - p2) * (j - p4) / ((p3 - p1) * (p3 - p2) * (p3 - p4))
-                      + img[i][3] * (j - p1) * (j - p2) * (j - p3) / ((p4 - p1) * (p4 - p2) * (p4 - p3));
+            float sum = md[0];
+            float product = 1.0;
+            for(int item=1, max=3; item<4; ++item,--max)
+            {
+                for(int k = 0; k < max; ++k)
+                {
+                    md[k] = (md[k+1] - md[k]) / (10 * item);
+                }
+                product *= (j - p[item-1]);
+                sum += md[0] * product;
+            }
+            tmp[i][j] = sum;
         }
-        p1 = 460;
-        p2 = 470;
-        p3 = 480;
-        p4 = 490;
+        p[0] = 460;
+        p[1] = 470;
+        p[2] = 480;
+        p[3] = 490;
+        md[0] = img[i][46];
+        md[1] = img[i][47];
+        md[2] = img[i][48];
+        md[3] = img[i][49];
         for (int j = 481; j <490; j++)
         {
-            tmp[i][j] = img[i][46] * (j - p2) * (j - p3) * (j - p4) / ((p1 - p2) * (p1 - p3) * (p1 - p4))
-                      + img[i][47] * (j - p1) * (j - p3) * (j - p4) / ((p2 - p1) * (p2 - p3) * (p2 - p4))
-                      + img[i][48] * (j - p1) * (j - p2) * (j - p4) / ((p3 - p1) * (p3 - p2) * (p3 - p4))
-                      + img[i][49] * (j - p1) * (j - p2) * (j - p3) / ((p4 - p1) * (p4 - p2) * (p4 - p3));
+            float sum = md[0];
+            float product = 1.0;
+            for(int item=1, max=3; item<4; ++item,--max)
+            {
+                for(int k = 0; k < max; ++k)
+                {
+                    md[k] = (md[k+1] - md[k]) / (10 * item);
+                }
+                product *= (j - p[item-1]);
+                sum += md[0] * product;
+            }
+            tmp[i][j] = sum;
         }
     }
     //插值列
@@ -163,10 +189,7 @@ int main()
     int cubic[491][491];
     for (int j = 0; j < 491; ++j)
     {
-        int p1 = -10;
-        int p2 = 0;
-        int p3 = 10;
-        int p4 = 20;
+        int p[4] ={-10,0,10,20};
         //除了前、后10行都进行插值
         for (int i = 10; i < 481; ++i)
         {
@@ -174,17 +197,26 @@ int main()
             {
                 // cubic[i][j] = 0;
                 cubic[i][j] = tmp[i / 10][j];
-                p1 += 10;
-                p2 += 10;
-                p3 += 10;
-                p4 += 10;
+                p[0] += 10;
+                p[1] += 10;
+                p[2] += 10;
+                p[3] += 10;
             }
             else
             {
-                cubic[i][j] = tmp[p1 / 10][j] * (i - p2) * (i - p3) * (i - p4) / ((p1 - p2) * (p1 - p3) * (p1 - p4))
-                            + tmp[p2 / 10][j] * (i - p1) * (i - p3) * (i - p4) / ((p2 - p1) * (p2 - p3) * (p2 - p4))
-                            + tmp[p3 / 10][j] * (i - p1) * (i - p2) * (i - p4) / ((p3 - p1) * (p3 - p2) * (p3 - p4))
-                            + tmp[p4 / 10][j] * (i - p1) * (i - p2) * (i - p3) / ((p4 - p1) * (p4 - p2) * (p4 - p3));
+                float md[4] = {tmp[p[0]/10][j], tmp[p[1]/10][j], tmp[p[2]/10][j], tmp[p[3]/10][j]};
+                float sum = md[0];
+                float product = 1.0;
+                for(int item=1, max=3; item<4; ++item,--max)
+                {
+                    for(int k = 0; k < max; ++k)
+                    {
+                        md[k] = (md[k+1] - md[k]) / (10 * item);
+                    }
+                    product *= (j - p[item-1]);
+                    sum += md[0] * product;
+                }
+                cubic[i][j] = sum;
             }
         }
     }
@@ -193,27 +225,45 @@ int main()
     {
         cubic[0][j] = tmp[0][j];
         cubic[490][j] = tmp[49][j];
-        int p1 = 0;
-        int p2 = 10;
-        int p3 = 20;
-        int p4 = 30;
+        int p[4] ={0,10,20,30};
+        float md[4] = {tmp[0][j], tmp[1][j], tmp[2][j], tmp[3][j]};
         for(int i = 0; i < 10; ++i)
         {
-            cubic[i][j] = tmp[0][j] * (i - p2) * (i - p3) * (i - p4) / ((p1 - p2) * (p1 - p3) * (p1 - p4))
-                        + tmp[1][j] * (i - p1) * (i - p3) * (i - p4) / ((p2 - p1) * (p2 - p3) * (p2 - p4))
-                        + tmp[2][j] * (i - p1) * (i - p2) * (i - p4) / ((p3 - p1) * (p3 - p2) * (p3 - p4))
-                        + tmp[3][j] * (i - p1) * (i - p2) * (i - p3) / ((p4 - p1) * (p4 - p2) * (p4 - p3));
+            float sum = md[0];
+            float product = 1.0;
+            for(int item=1, max=3; item<4; ++item,--max)
+            {
+                for(int k = 0; k < max; ++k)
+                {
+                    md[k] = (md[k+1] - md[k]) / (10 * item);
+                }
+                product *= (i - p[item-1]);
+                sum += md[0] * product;
+            }
+            cubic[i][j] = sum;
         }
-        p1 = 460;
-        p2 = 470;
-        p3 = 480;
-        p4 = 490;
+        p[0] = 460;
+        p[1] = 470;
+        p[2] = 480;
+        p[3] = 490;
+        md[0] = tmp[46][j];
+        md[1] = tmp[47][j];
+        md[2] = tmp[48][j];
+        md[3] = tmp[49][j];
         for(int i = 481; i < 490; ++i)
         {
-            cubic[i][j] = tmp[46][j] * (i - p2) * (i - p3) * (i - p4) / ((p1 - p2) * (p1 - p3) * (p1 - p4))
-                        + tmp[47][j] * (i - p1) * (i - p3) * (i - p4) / ((p2 - p1) * (p2 - p3) * (p2 - p4))
-                        + tmp[48][j] * (i - p1) * (i - p2) * (i - p4) / ((p3 - p1) * (p3 - p2) * (p3 - p4))
-                        + tmp[49][j] * (i - p1) * (i - p2) * (i - p3) / ((p4 - p1) * (p4 - p2) * (p4 - p3));
+            float sum = md[0];
+            float product = 1.0;
+            for(int item=1, max=3; item<4; ++item,--max)
+            {
+                for(int k = 0; k < max; ++k)
+                {
+                    md[k] = (md[k+1] - md[k]) / (10 * item);
+                }
+                product *= (i - p[item-1]);
+                sum += md[0] * product;
+            }
+            cubic[i][j] = sum;
         }
 
     }
@@ -235,8 +285,8 @@ int main()
     duration_linear = (double)(linear_ed - linear_bg) / CLK_TCK;
     duration_cubic = (double)(cubic_ed - linear_ed) / CLK_TCK;
     duration = (double)(stop - start) / CLK_TCK;
-    printf("拉格朗日线性插值所用时间：%f\n", duration_linear);
-    printf("拉格朗日三次插值所用时间：%f\n", duration_cubic);
+    printf("牛顿线性插值所用时间：%f\n", duration_linear);
+    printf("牛顿三次插值所用时间：%f\n", duration_cubic);
     printf("程序运行所用时间：%f\n", duration);
 
     system("pause");

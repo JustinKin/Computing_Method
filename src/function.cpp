@@ -370,8 +370,8 @@ void Lagrange()
             {
                 cubic[i][j] = tmp[p1 / 10][j] * (i - p2) * (i - p3) * (i - p4) / ((p1 - p2) * (p1 - p3) * (p1 - p4))
                             + tmp[p2 / 10][j] * (i - p1) * (i - p3) * (i - p4) / ((p2 - p1) * (p2 - p3) * (p2 - p4))
-                            + tmp[p2 / 10][j] * (i - p1) * (i - p2) * (i - p4) / ((p3 - p1) * (p3 - p2) * (p3 - p4))
-                            + tmp[p2 / 10][j] * (i - p1) * (i - p2) * (i - p3) / ((p4 - p1) * (p4 - p2) * (p4 - p3));
+                            + tmp[p3 / 10][j] * (i - p1) * (i - p2) * (i - p4) / ((p3 - p1) * (p3 - p2) * (p3 - p4))
+                            + tmp[p4 / 10][j] * (i - p1) * (i - p2) * (i - p3) / ((p4 - p1) * (p4 - p2) * (p4 - p3));
             }
         }
     }
@@ -425,5 +425,10 @@ void Lagrange()
     printf("拉格朗日线性插值所用时间：%f\n", duration_linear);
     printf("拉格朗日三次插值所用时间：%f\n", duration_cubic);
     printf("程序运行所用时间：%f\n", duration);
+
+}
+
+void Newton()
+{
 
 }
