@@ -7,11 +7,11 @@
 clock_t start, stop, linear_bg, linear_ed, cubic_ed;
 double duration, duration_linear, duration_cubic;
 
-float A[5][6] = {0.0};
+float A1[5][6] = {0.0}, A2[5][6] = {0.0}, A3[5][6] = {0.0};
 float t[9] = {0.0};
-void ComputeMatrix(float *p);
-void GaussSolve();
-void LuSolve();
+void ComputeMatrix(float *p, float A[5][6]);
+void GaussSolve(float A[5][6]);
+void LuSolve(float A[5][6]);
 
 int main()
 {
@@ -27,14 +27,18 @@ int main()
         t[i] = tmp * i - 1;
     }
     printf("=========== X坐标拟合结果 ===========\n");
-    ComputeMatrix(x);
-    GaussSolve();
+    ComputeMatrix(x, A1);
+    GaussSolve(A1);
+
     printf("=========== Y坐标拟合结果 ===========\n");
-    ComputeMatrix(y);
-    LuSolve();
+    ComputeMatrix(y, A2);
+    LuSolve(A2);
+    // GaussSolve(A2);
+
     printf("=========== Z坐标拟合结果 ===========\n");
-    ComputeMatrix(z);
-    LuSolve();
+    ComputeMatrix(z, A3);
+    LuSolve(A3);
+    // GaussSolve(A3);
 
     stop = clock();
     duration = (double)(stop - start) / CLK_TCK;
@@ -44,7 +48,7 @@ int main()
     return 0;
 }
 
-void ComputeMatrix(float *p)
+void ComputeMatrix(float *p, float A[5][6])
 {
     for (int i = 0; i < 5; ++i)
     {
@@ -64,7 +68,7 @@ void ComputeMatrix(float *p)
     }
 }
 
-void GaussSolve()
+void GaussSolve(float A[5][6])
 {
     //输出增广矩阵A
     printf("A = \n");
@@ -107,10 +111,10 @@ void GaussSolve()
     {
         printf("% 6f  ", result[i]);
     }
-    printf("\n\n");
+    printf("\n\n\n");
 }
 
-void LuSolve()
+void LuSolve(float A[5][6])
 {
     //输出增广矩阵A
     printf("A = \n");
@@ -166,5 +170,5 @@ void LuSolve()
     printf("Result = \n");
     for (int i = 0; i < 5; ++i)
         printf("% 6f  ", X[i]);
-    printf("\n\n");
+    printf("\n\n\n");
 }
