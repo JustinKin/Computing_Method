@@ -9,7 +9,7 @@ double duration;
 
 int main()
 {
-	start = clock();
+    start = clock();
 
     FILE *read = NULL;
     //打开曲面数据的文件
@@ -30,25 +30,25 @@ int main()
     }
     fclose(read);
 
-	double area = 0.0;
-	for(int i =0; i < 100; ++i)
-	{
-		double piece = surface[i][0] + surface[i][101];
-		for(int j = 1; j < 50; ++j)
-		{
-			piece += (4.0 * surface[i][2*j - 1] + 2.0 * surface[i][2*j]);
-		}
-		piece += (4.0 * surface[i][99]) ;
-		area += piece;
-	}
-	area /= 150.0;
-	double volume = area * 0.04;
-	printf("所求体积为：%f\n", volume);
+    double area = 0.0;
+    for (int i = 0; i < 100; ++i)
+    {
+        double piece = surface[i][0] + surface[i][101];
+        for (int j = 1; j < 50; ++j)
+        {
+            piece += (4.0 * surface[i][2 * j - 1] + 2.0 * surface[i][2 * j]);
+        }
+        piece += (4.0 * surface[i][99]);
+        area += piece;
+    }
+    area /= 150.0;
+    double volume = area * 0.04;
+    printf("所求体积为：%f\n", volume);
 
     stop = clock();
     duration = (double)(stop - start) / CLK_TCK;
     printf("程序运行所用时间：%f\n", duration);
 
-	system("pause");
-	return 0;
+    system("pause");
+    return 0;
 }
