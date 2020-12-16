@@ -29,20 +29,26 @@ int main()
         }
     }
     fclose(read);
-
-    double area = 0.0;
-    for (int i = 0; i < 100; ++i)
+    // first Simpson
+    double area[101] = {0.0};
+    for (int i = 0; i < 101; ++i)
     {
-        double piece = surface[i][0] + surface[i][101];
+        double piece = surface[i][0] + surface[i][100];
         for (int j = 1; j < 50; ++j)
         {
             piece += (4.0 * surface[i][2 * j - 1] + 2.0 * surface[i][2 * j]);
         }
         piece += (4.0 * surface[i][99]);
-        area += piece;
+        area[i] = piece/75;
     }
-    area /= 150.0;
-    double volume = area * 0.04;
+    // second Simpson
+    double volume = area[0] + area[100];
+    for(int i = 1; i < 50; ++i)
+    {
+        volume += (4.0 * area[2 * i - 1] + 2.0 * area[2 * i]);
+    }
+    volume += (4.0 * area[99]);
+    volume /= 75;
     printf("所求体积为：%f\n", volume);
 
     stop = clock();
